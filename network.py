@@ -21,7 +21,7 @@ class Network:
         return input
 
     def learn(training_data, epochs, learning_rate, batch_size, test_data=None):
-        # will learn via gradient descent
+        # learn via stochastic gradient descent
         for epoch in range(epochs):
             random.shuffle(training_data)
             mini_batches = [training_data[k : k + batch_size] for k in range(0, len(training_data), batch_size)]
@@ -31,15 +31,23 @@ class Network:
 
         return
     
-    # def update_weights(mini_batch):
-    #     delta_w = [np.zeros(w.shape) for w in self.weights]
-    #     delta_b = [np.zeros(b.shape) for b in self.weights]
+    def update_weights(mini_batch, learning_rate):
+        delta_w_total = [np.zeros(w.shape) for w in self.weights]
+        delta_b_total = [np.zeros(b.shape) for b in self.weights]
 
-    #     for x, y in mini_batch:
-    #         gradient_w, gradient_b = backpropagate(x, y)
+        for x, y in mini_batch:
+            delta_w, delta_b = backpropagate(x, y)
+            delta_w_total = [dwt + dw for dwt, dw in zip(delta_w_total, delta_w)]
+            delta_b_total = [dbt + db for dbt, db in zip(delta_b_total, delta_b)]
+
+        delta_w_avg = delta_w_total / len(mini_batch)
+        delta_b_avg = delta_b_total / len(mini_batch)
+
+        self.weights = [w - (learning_rate * dw) for w, dw in zip(self.weights, delta_w_avg)]
+        self.biases = [b - (learning_rate * db) for b, db in zip(self.biases, delta_b_avg)]
 
 
-    #     return
+        return
 
     def backpropagate(x, y):
         """ lets assume 3 nodes. 1 input, 1 output,
